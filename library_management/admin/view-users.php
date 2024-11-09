@@ -1,0 +1,138 @@
+<?php
+global $conn;
+session_start();
+include ('../connection.php');
+$name = $_SESSION['name'];
+$id = $_SESSION['id'];
+if(empty($id))
+{
+    header("Location: index.php");
+}
+?>
+<?php include('include/header.php'); ?>
+<div id="wrapper">
+
+    <?php include('include/side-bar.php'); ?>
+
+    <div id="content-wrapper">
+
+        <div class="container-fluid">
+
+            <!-- Breadcrumbs-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">View Users</a>
+                </li>
+            </ol>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-info-circle"></i>
+                    View Details
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                            <tr>
+                                <th>S.No.</th>
+                                <th>User Name</th>
+                                <th>EmailId</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                                if(isset($_GET['ids'])){
+                                    $id = $_GET['ids'];
+                                    $delete_query = mysqli_query($conn, "delete from users_table where id='$id'");
+
+                                    if($delete_query > 0){
+                                        $_SESSION['icon'] = "success";
+                                        $_SESSION['text'] = "User Deleted Successfully";
+
+                                        unset($id);
+                                    } else {
+                                        $_SESSION['icon'] = "error";
+                                        $_SESSION['text'] = "User Not Deleted";
+
+                                    }
+                                }
+                                $select_query = mysqli_query($conn, "select * from users_table");
+                                $sn = 1;
+                                while($row = mysqli_fetch_array($select_query))
+                                {
+                            ?>
+                            <tr>
+                                <td><?php echo $sn; ?></td>
+                                <td><?php echo $row['user_name']; ?></td>
+                                <td><?php echo $row['email']; ?></td>
+                                <?php if($row['role']==1){
+                                ?><td>Admin</td>
+                                <?php } else { ?><td>User</td>
+                                <?php } ?>
+                                <?php if($row['status']==1){
+                                ?><td><span class="badge badge-success">Active</span></td>
+                                <?php } else { ?><td><span class="badge badge-danger">Inactive</span></td>
+                                <?php } ?>
+                                <td>
+                                    <a href="edit-user.php?id=<?php echo $row['id'];?>"><i class="fa fa-pencil m-r-5"></i> Edit</a>
+                                    <a href="#" onclick="return confirmDelete(<?php echo $row['id'];?>)"><i class="fa fa-trash-o m-r-5"></i> Delete</a>
+                                </td>
+                            </tr>
+                            <?php $sn++; } ?>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <?php include('include/footer.php'); ?>
+
+    <script language="JavaScript" type="text/javascript">
+        function confirmDelete(id){
+            return Swal.fire({
+                title: "Are you sure?",
+                text: "Are you sure you want to delete this User?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete user!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                        window.location.href = `view-users.php?ids=${id}`;
+                }
+
+            })
+        }
+    </script>
+
+    <?php
+        if(isset($_SESSION['text']) || isset($_SESSION['icon'])) {
+            ?>
+            <script>
+                Swal.fire({
+                    icon: "<?php echo $_SESSION['icon']?>",
+                    text: "<?php echo $_SESSION['text']?>",
+
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `view-users.php`;
+                    }
+
+                });
+            </script>
+            <?php
+            unset($_SESSION['text'], $_SESSION['icon']);
+        }
+    ?>
