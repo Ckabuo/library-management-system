@@ -4,7 +4,7 @@ session_start();
 include ('connection.php');
 $name = $_SESSION['user_name'];
 $ids = $_SESSION['id'];
-if(empty($ids))
+if(empty($ids) || empty($name))
 {
     header("Location: index.php"); 
 }

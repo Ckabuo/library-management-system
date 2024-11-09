@@ -1,9 +1,10 @@
 <?php
+global $conn;
 session_start();
 $name = $_SESSION['user_name'];
 $id = $_SESSION['id'];
 include 'connection.php';
-if(empty($name))
+if(empty($name) || empty($id))
 {
     header("Location: index.php"); 
 }
